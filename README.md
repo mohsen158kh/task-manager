@@ -5,6 +5,19 @@ A modern, feature-rich task management application built with React, TypeScript,
 ![Task Manager](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![License](https://img.shields.io/badge/license-LGPL--2.1-green.svg)
 
+## 🌐 Live Demo
+
+Experience the application in action! Visit our live deployment to explore all features without any setup:
+
+**🔗 [View Live Application](https://task-manager.liara.run/)**
+
+The live demo is hosted on [Liara](https://liara.ir) and includes all the latest features. You can:
+- Create and manage tasks in real-time
+- Test the drag-and-drop functionality
+- Switch between dark and light themes
+- Experience the responsive design on any device
+- All your data is stored locally in your browser
+
 ## ✨ Features
 
 ### Core Functionality
