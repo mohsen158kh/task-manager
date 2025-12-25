@@ -1,20 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TextField,
   Button,
   Box,
   Typography,
   Grid,
   IconButton,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import { useAppDispatch } from '../store/hooks';
 import { addSection, updateSection } from '../features/tasks/taskSlice';
 import type { Section } from '../features/tasks/taskTypes';
+import GeneralModal from './GeneralModal';
+import GeneralDrawer from './GeneralDrawer';
 
 interface SectionFormProps {
   open: boolean;
@@ -41,7 +41,11 @@ const getContrastColor = (hexColor: string): string => {
   return luminance > 0.5 ? '#000000' : '#ffffff';
 };
 
-const SectionForm: React.FC<SectionFormProps> = ({ open, onClose, section }) => {
+const SectionFormContent: React.FC<{
+  section?: Section | null;
+  onSubmit: () => void;
+  onCancel: () => void;
+}> = ({ section, onSubmit, onCancel }) => {
   const dispatch = useAppDispatch();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -74,7 +78,7 @@ const SectionForm: React.FC<SectionFormProps> = ({ open, onClose, section }) => 
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [section, open]);
+  }, [section]);
 
   const handleSubmit = () => {
     if (!title.trim()) {
@@ -101,267 +105,233 @@ const SectionForm: React.FC<SectionFormProps> = ({ open, onClose, section }) => 
     setDescription('');
     setColor('#1976d2');
     setTitleError(false);
-    onClose();
-  };
-
-  const handleClose = () => {
-    setTitle('');
-    setDescription('');
-    setColor('#1976d2');
-    setTitleError(false);
-    onClose();
+    onSubmit();
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={handleClose} 
-      maxWidth="sm" 
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 3,
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-        },
-      }}
-    >
-      <DialogTitle 
-        sx={{ 
-          pb: 2,
-          fontWeight: 700,
-          fontSize: '1.5rem',
-          background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-          color: 'white',
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt:3 }}>
+      <TextField
+        label="Title"
+        value={title}
+        onChange={(e) => {
+          setTitle(e.target.value);
+          setTitleError(false);
         }}
-      >
-        {section ? 'Edit Section' : 'Add New Section'}
-      </DialogTitle>
-      <DialogContent sx={{ pt: 3 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 3 }}>
-          <TextField
-            label="Title"
-            value={title}
-            onChange={(e) => {
-              setTitle(e.target.value);
-              setTitleError(false);
-            }}
-            error={titleError}
-            helperText={titleError ? 'Title is required' : ''}
-            required
-            fullWidth
-            autoFocus
-            InputProps={{
-              style: { fontSize: '16px' },
-            }}
-            InputLabelProps={{
-              style: { fontSize: '16px' },
-            }}
-          />
-          <TextField
-            label="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            multiline
-            rows={3}
-            fullWidth
-            InputProps={{
-              style: { fontSize: '16px' },
-            }}
-            InputLabelProps={{
-              style: { fontSize: '16px' },
-            }}
-          />
-          <Box>
-            <Typography variant="body2" sx={{ mb: 2, fontWeight: 500, color: 'text.primary' }}>
-              Color
-            </Typography>
-            
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
-                Quick Select
-              </Typography>
-              <Grid container spacing={1}>
-                {presetColors.map((presetColor) => (
-                  <Grid item key={presetColor}>
-                    <IconButton
-                      onClick={() => setColor(presetColor)}
-                      sx={{
-                        width: 44,
-                        height: 44,
-                        bgcolor: presetColor,
-                        border: color === presetColor ? '3px solid' : '2px solid',
-                        borderColor: color === presetColor ? 'primary.main' : 'divider',
-                        borderRadius: 1,
-                        transition: 'all 0.2s',
-                        '&:hover': {
-                          transform: 'scale(1.1)',
-                          boxShadow: 2,
-                        },
-                        boxShadow: color === presetColor ? 3 : 1,
-                      }}
-                    >
-                      {color === presetColor && (
-                        <CheckIcon
-                          sx={{
-                            color: getContrastColor(presetColor),
-                            fontSize: 24,
-                            fontWeight: 'bold',
-                          }}
-                        />
-                      )}
-                    </IconButton>
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
-                Custom Color
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box
-                  component="label"
+        error={titleError}
+        helperText={titleError ? 'Title is required' : ''}
+        required
+        fullWidth
+        autoFocus
+        InputProps={{
+          style: { fontSize: '16px' },
+        }}
+        InputLabelProps={{
+          style: { fontSize: '16px' },
+        }}
+      />
+      <TextField
+        label="Description"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        multiline
+        rows={3}
+        fullWidth
+        InputProps={{
+          style: { fontSize: '16px' },
+        }}
+        InputLabelProps={{
+          style: { fontSize: '16px' },
+        }}
+      />
+      <Box>
+        <Typography variant="body2" sx={{ mb: 2, fontWeight: 500, color: 'text.primary' }}>
+          Color
+        </Typography>
+        
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+            Quick Select
+          </Typography>
+          <Grid container spacing={1}>
+            {presetColors.map((presetColor) => (
+              <Grid item key={presetColor}>
+                <IconButton
+                  onClick={() => setColor(presetColor)}
                   sx={{
-                    position: 'relative',
-                    width: 100,
-                    height: 100,
-                    borderRadius: 2,
-                    bgcolor: color,
-                    border: '2px solid',
-                    borderColor: 'divider',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    overflow: 'hidden',
+                    width: 44,
+                    height: 44,
+                    bgcolor: presetColor,
+                    border: color === presetColor ? '3px solid' : '2px solid',
+                    borderColor: color === presetColor ? 'primary.main' : 'divider',
+                    borderRadius: 1,
                     transition: 'all 0.2s',
                     '&:hover': {
-                      boxShadow: 4,
-                      transform: 'scale(1.02)',
+                      transform: 'scale(1.1)',
+                      boxShadow: 2,
                     },
+                    boxShadow: color === presetColor ? 3 : 1,
                   }}
                 >
-                  <input
-                    ref={colorInputRef}
-                    type="color"
-                    defaultValue={color}
-                    onChange={(e) => {
-                      const newColor = e.target.value;
-                      const previewBox = e.target.parentElement as HTMLElement;
-                      if (previewBox) {
-                        previewBox.style.backgroundColor = newColor;
-                        const textBox = previewBox.querySelector('[role="text"]') as HTMLElement;
-                        if (textBox) {
-                          const contrastColor = getContrastColor(newColor);
-                          textBox.style.color = contrastColor;
-                          const textElement = textBox.querySelector('p');
-                          if (textElement) {
-                            textElement.textContent = newColor.toUpperCase();
-                          }
-                        }
-                      }
-                      if (debounceTimerRef.current) {
-                        clearTimeout(debounceTimerRef.current);
-                      }
-                      debounceTimerRef.current = setTimeout(() => {
-                        setColor(newColor);
-                      }, 150);
-                    }}
-                    style={{
-                      position: 'absolute',
-                      width: '100%',
-                      height: '100%',
-                      opacity: 0,
-                      cursor: 'pointer',
-                    }}
-                  />
-                  <Box
-                    role="text"
-                    sx={{
-                      position: 'absolute',
-                      bottom: 8,
-                      left: 8,
-                      right: 8,
-                      bgcolor: 'rgba(0, 0, 0, 0.6)',
-                      borderRadius: 1,
-                      py: 0.5,
-                      px: 1,
-                      pointerEvents: 'none',
-                    }}
-                  >
-                    <Typography
-                      component="p"
-                      variant="caption"
+                  {color === presetColor && (
+                    <CheckIcon
                       sx={{
-                        color: getContrastColor(color),
-                        fontWeight: 600,
-                        fontSize: '0.7rem',
-                        letterSpacing: 0.5,
+                        color: getContrastColor(presetColor),
+                        fontSize: 24,
+                        fontWeight: 'bold',
                       }}
-                    >
-                      {color.toUpperCase()}
-                    </Typography>
-                  </Box>
-                </Box>
-                
-                <Box sx={{ flex: 1 }}>
-                  <TextField
-                    label="Hex Color"
-                    value={color}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (/^#[0-9A-Fa-f]{0,6}$/.test(value)) {
-                        if (colorInputRef.current) {
-                          colorInputRef.current.value = value;
-                        }
-                        if (debounceTimerRef.current) {
-                          clearTimeout(debounceTimerRef.current);
-                        }
-                        debounceTimerRef.current = setTimeout(() => {
-                          setColor(value);
-                        }, 100);
+                    />
+                  )}
+                </IconButton>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+
+        <Box>
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+            Custom Color
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box
+              component="label"
+              sx={{
+                position: 'relative',
+                width: 100,
+                height: 100,
+                borderRadius: 2,
+                bgcolor: color,
+                border: '2px solid',
+                borderColor: 'divider',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                overflow: 'hidden',
+                transition: 'all 0.2s',
+                '&:hover': {
+                  boxShadow: 4,
+                  transform: 'scale(1.02)',
+                },
+              }}
+            >
+              <input
+                ref={colorInputRef}
+                type="color"
+                defaultValue={color}
+                onChange={(e) => {
+                  const newColor = e.target.value;
+                  const previewBox = e.target.parentElement as HTMLElement;
+                  if (previewBox) {
+                    previewBox.style.backgroundColor = newColor;
+                    const textBox = previewBox.querySelector('[role="text"]') as HTMLElement;
+                    if (textBox) {
+                      const contrastColor = getContrastColor(newColor);
+                      textBox.style.color = contrastColor;
+                      const textElement = textBox.querySelector('p');
+                      if (textElement) {
+                        textElement.textContent = newColor.toUpperCase();
                       }
-                    }}
-                    fullWidth
-                    size="small"
-                    InputProps={{
-                      style: { fontSize: '16px' },
-                      startAdornment: (
-                        <Box
-                          sx={{
-                            width: 24,
-                            height: 24,
-                            borderRadius: '4px',
-                            bgcolor: color,
-                            border: '1px solid',
-                            borderColor: 'divider',
-                            mr: 1.5,
-                            flexShrink: 0,
-                          }}
-                        />
-                      ),
-                    }}
-                    InputLabelProps={{
-                      style: { fontSize: '16px' },
-                    }}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        '&:hover fieldset': {
-                          borderColor: 'primary.main',
-                        },
-                      },
-                    }}
-                  />
-                </Box>
+                    }
+                  }
+                  if (debounceTimerRef.current) {
+                    clearTimeout(debounceTimerRef.current);
+                  }
+                  debounceTimerRef.current = setTimeout(() => {
+                    setColor(newColor);
+                  }, 150);
+                }}
+                style={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  opacity: 0,
+                  cursor: 'pointer',
+                }}
+              />
+              <Box
+                role="text"
+                sx={{
+                  position: 'absolute',
+                  bottom: 8,
+                  left: 8,
+                  right: 8,
+                  bgcolor: 'rgba(0, 0, 0, 0.6)',
+                  borderRadius: 1,
+                  py: 0.5,
+                  px: 1,
+                  pointerEvents: 'none',
+                }}
+              >
+                <Typography
+                  component="p"
+                  variant="caption"
+                  sx={{
+                    color: getContrastColor(color),
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  {color.toUpperCase()}
+                </Typography>
               </Box>
+            </Box>
+            
+            <Box sx={{ flex: 1 }}>
+              <TextField
+                label="Hex Color"
+                value={color}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (/^#[0-9A-Fa-f]{0,6}$/.test(value)) {
+                    if (colorInputRef.current) {
+                      colorInputRef.current.value = value;
+                    }
+                    if (debounceTimerRef.current) {
+                      clearTimeout(debounceTimerRef.current);
+                    }
+                    debounceTimerRef.current = setTimeout(() => {
+                      setColor(value);
+                    }, 100);
+                  }
+                }}
+                fullWidth
+                size="small"
+                InputProps={{
+                  style: { fontSize: '16px' },
+                  startAdornment: (
+                    <Box
+                      sx={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: '4px',
+                        bgcolor: color,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        mr: 1.5,
+                        flexShrink: 0,
+                      }}
+                    />
+                  ),
+                }}
+                InputLabelProps={{
+                  style: { fontSize: '16px' },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': {
+                      borderColor: 'primary.main',
+                    },
+                  },
+                }}
+              />
             </Box>
           </Box>
         </Box>
-      </DialogContent>
-      <DialogActions sx={{ p: 3, pt: 2, gap: 1 }}>
+      </Box>
+      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2, pt: 2 }}>
         <Button 
-          onClick={handleClose}
+          onClick={onCancel}
           sx={{
             textTransform: 'none',
             fontWeight: 600,
@@ -385,8 +355,54 @@ const SectionForm: React.FC<SectionFormProps> = ({ open, onClose, section }) => 
         >
           {section ? 'Update Section' : 'Add Section'}
         </Button>
-      </DialogActions>
-    </Dialog>
+      </Box>
+    </Box>
+  );
+};
+
+const SectionForm: React.FC<SectionFormProps> = ({ open, onClose, section }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  const handleClose = () => {
+    onClose();
+  };
+
+  const title = section ? 'Edit Section' : 'Add New Section';
+  const headerGradient = 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)';
+
+  if (isMobile) {
+    return (
+      <GeneralDrawer
+        open={open}
+        onClose={handleClose}
+        title={title}
+        headerGradient={headerGradient}
+        anchor="bottom"
+      >
+        <SectionFormContent
+          section={section}
+          onSubmit={handleClose}
+          onCancel={handleClose}
+        />
+      </GeneralDrawer>
+    );
+  }
+
+  return (
+    <GeneralModal
+      open={open}
+      onClose={handleClose}
+      title={title}
+      headerGradient={headerGradient}
+      maxWidth="sm"
+    >
+      <SectionFormContent
+        section={section}
+        onSubmit={handleClose}
+        onCancel={handleClose}
+      />
+    </GeneralModal>
   );
 };
 
