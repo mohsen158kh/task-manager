@@ -77,7 +77,78 @@ Before you begin, ensure you have the following installed:
    npm run preview
    ```
 
-The production build will be available in the `dist` directory, ready for deployment.
+The production build will be available in the `build` directory, ready for deployment.
+
+### Deployment to Liara
+
+This project is configured for deployment on [Liara](https://liara.ir), an Iranian cloud platform. Follow these steps to deploy:
+
+#### Prerequisites
+
+1. **Install Liara CLI**
+   ```bash
+   npm install -g @liara/cli
+   ```
+
+2. **Login to Liara**
+   ```bash
+   liara login
+   ```
+
+#### Configuration
+
+The project includes a `liara.json` file with the following configuration:
+- **Platform**: React (Vite)
+- **Build Output**: `build` directory (configured in `vite.config.ts`)
+- **Start Script**: Automatically serves the build folder
+
+**Important**: Before deploying, update the `app` field in `liara.json` with your Liara app ID:
+```json
+{
+  "app": "your-app-id",
+  "platform": "react"
+}
+```
+
+#### Deployment Steps
+
+1. **Ensure your project is ready**
+   - Make sure `node_modules` is in `.gitignore` (already configured)
+   - Verify `package.json` has `build` and `start` scripts (already configured)
+   - Check that `vite.config.ts` has `outDir: "build"` (already configured)
+
+2. **Deploy to Liara**
+   ```bash
+   liara deploy
+   ```
+
+3. **Monitor deployment**
+   - Watch the deployment logs in your terminal
+   - Check the deployment history in Liara console
+
+#### Liara Configuration Options
+
+You can customize the deployment in `liara.json`:
+
+- **Disable npm mirror** (if you encounter package installation issues):
+  ```json
+  {
+    "react": {
+      "mirror": false
+    }
+  }
+  ```
+
+- **Enable source maps** (for debugging):
+  ```json
+  {
+    "react": {
+      "sourceMap": true
+    }
+  }
+  ```
+
+For more information, visit the [Liara React deployment documentation](https://docs.liara.ir/paas/react/how-tos/deploy-app/).
 
 ## 📖 Usage Guide
 

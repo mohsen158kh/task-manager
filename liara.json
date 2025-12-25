@@ -1,0 +1,9 @@
+{
+  "app": "task-manager",
+  "platform": "react",
+  "react": {
+    "mirror": true,
+    "sourceMap": false
+  }
+}
+
