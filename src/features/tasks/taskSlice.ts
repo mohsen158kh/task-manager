@@ -50,6 +50,12 @@ const tasksSlice = createSlice({
         state.tasks[index] = action.payload;
       }
     },
+    deleteTask: (state, action: PayloadAction<string>) => {
+      const index = state.tasks.findIndex((t) => t.id === action.payload);
+      if (index !== -1) {
+        state.tasks.splice(index, 1);
+      }
+    },
     addSection: (state, action: PayloadAction<Omit<Section, 'id'>>) => {
       const newSection: Section = {
         id: crypto.randomUUID(),
@@ -68,11 +74,8 @@ const tasksSlice = createSlice({
     deleteSection: (state, action: PayloadAction<string>) => {
       const index = state.sections.findIndex((s) => s.id === action.payload);
       if (index !== -1) {
-        state.tasks.forEach((task) => {
-          if (task.sectionId === action.payload) {
-            task.sectionId = undefined;
-          }
-        });
+        // Delete all tasks belonging to this section
+        state.tasks = state.tasks.filter((task) => task.sectionId !== action.payload);
         state.sections.splice(index, 1);
       }
     },
@@ -92,6 +95,7 @@ export const {
   reorderTasks,
   loadTasks,
   updateTask,
+  deleteTask,
   addSection,
   updateSection,
   deleteSection,

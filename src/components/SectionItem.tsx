@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
@@ -27,10 +27,12 @@ import {
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 import EditIcon from '@mui/icons-material/Edit';
 import AddTaskIcon from '@mui/icons-material/AddTask';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useAppDispatch } from '../store/hooks';
-import { reorderTasks } from '../features/tasks/taskSlice';
+import { reorderTasks, deleteSection } from '../features/tasks/taskSlice';
 import type { Section, Task } from '../features/tasks/taskTypes';
 import TaskItem from './TaskItem';
+import ConfirmModal from './ConfirmModal';
 
 interface SectionItemProps {
   section: Section;
@@ -49,6 +51,7 @@ const SectionItem: React.FC<SectionItemProps> = ({
 }) => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const {
     attributes,
     listeners,
@@ -100,6 +103,18 @@ const SectionItem: React.FC<SectionItemProps> = ({
     const newTasks = [...reorderedSectionTasks, ...otherTasks];
     dispatch(reorderTasks(newTasks));
   }, [sectionTasks, tasks, section.id, dispatch]);
+
+  const handleDeleteClick = useCallback(() => {
+    setDeleteDialogOpen(true);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(() => {
+    dispatch(deleteSection(section.id));
+  }, [section.id, dispatch]);
+
+  const handleDeleteCancel = useCallback(() => {
+    setDeleteDialogOpen(false);
+  }, []);
 
   return (
     <Paper
@@ -195,6 +210,22 @@ const SectionItem: React.FC<SectionItemProps> = ({
             </IconButton>
           )}
           <IconButton
+            size="small"
+            onClick={handleDeleteClick}
+            sx={{
+              color: 'text.secondary',
+              transition: 'all 0.2s',
+              '&:hover': {
+                bgcolor: 'error.main',
+                color: 'white',
+                transform: 'scale(1.1)',
+              },
+            }}
+            title="Delete Section"
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+          <IconButton
             {...attributes}
             {...listeners}
             size="small"
@@ -270,6 +301,16 @@ const SectionItem: React.FC<SectionItemProps> = ({
           </DndContext>
         )}
       </Box>
+      <ConfirmModal
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Section"
+        message={`Are you sure you want to delete the section "${section.title}"? All tasks in this section will also be deleted. This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        confirmColor="error"
+      />
     </Paper>
   );
 };

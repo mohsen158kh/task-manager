@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
@@ -12,9 +12,11 @@ import {
 } from '@mui/material';
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useAppDispatch } from '../store/hooks';
-import { toggleTask } from '../features/tasks/taskSlice';
+import { toggleTask, deleteTask } from '../features/tasks/taskSlice';
 import type { Task } from '../features/tasks/taskTypes';
+import ConfirmModal from './ConfirmModal';
 
 interface TaskItemProps {
   task: Task;
@@ -23,6 +25,7 @@ interface TaskItemProps {
 
 const TaskItem: React.FC<TaskItemProps> = ({ task, onEdit }) => {
   const dispatch = useAppDispatch();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const {
     attributes,
     listeners,
@@ -44,6 +47,19 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onEdit }) => {
     e.stopPropagation();
     dispatch(toggleTask(task.id));
   }, [task.id, dispatch]);
+
+  const handleDeleteClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDeleteDialogOpen(true);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(() => {
+    dispatch(deleteTask(task.id));
+  }, [task.id, dispatch]);
+
+  const handleDeleteCancel = useCallback(() => {
+    setDeleteDialogOpen(false);
+  }, []);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return null;
@@ -110,6 +126,21 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onEdit }) => {
               <EditIcon fontSize="small" />
             </IconButton>
           )}
+          <IconButton
+            size="small"
+            onClick={handleDeleteClick}
+            sx={{
+              color: 'text.secondary',
+              transition: 'all 0.2s',
+              '&:hover': {
+                bgcolor: 'error.main',
+                color: 'white',
+                transform: 'scale(1.1)',
+              },
+            }}
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
           <IconButton
             {...attributes}
             {...listeners}
@@ -192,6 +223,16 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onEdit }) => {
             </Typography>
           ) : null
         }
+      />
+      <ConfirmModal
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Task"
+        message={`Are you sure you want to delete the task "${task.title}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        confirmColor="error"
       />
     </ListItem>
   );
