@@ -135,6 +135,12 @@ const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task, preselectedSec
             required
             fullWidth
             autoFocus
+            InputProps={{
+              style: { fontSize: '16px' },
+            }}
+            InputLabelProps={{
+              style: { fontSize: '16px' },
+            }}
           />
           <TextField
             label="Description"
@@ -143,14 +149,26 @@ const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task, preselectedSec
             multiline
             rows={4}
             fullWidth
+            InputProps={{
+              style: { fontSize: '16px' },
+            }}
+            InputLabelProps={{
+              style: { fontSize: '16px' },
+            }}
           />
           <FormControl fullWidth>
-            <InputLabel>Section</InputLabel>
+            <InputLabel sx={{ fontSize: '16px' }}>Section</InputLabel>
             <Select
               value={sectionId}
               label="Section"
               required
               onChange={(e) => setSectionId(e.target.value)}
+              sx={{
+                fontSize: '16px',
+                '& .MuiSelect-select': {
+                  fontSize: '16px',
+                },
+              }}
             >
               {sections.map((section) => (
                 <MenuItem key={section.id} value={section.id}>
@@ -179,8 +197,12 @@ const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task, preselectedSec
                 value={estimatedDate}
                 onChange={(e) => setEstimatedDate(e.target.value)}
                 fullWidth
+                InputProps={{
+                  style: { fontSize: '16px' },
+                }}
                 InputLabelProps={{
                   shrink: true,
+                  style: { fontSize: '16px' },
                 }}
               />
             </Grid>
@@ -191,7 +213,10 @@ const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task, preselectedSec
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
                 fullWidth
-                inputProps={{ min: 0, step: 0.5 }}
+                inputProps={{ min: 0, step: 0.5, style: { fontSize: '16px' } }}
+                InputLabelProps={{
+                  style: { fontSize: '16px' },
+                }}
               />
             </Grid>
           </Grid>

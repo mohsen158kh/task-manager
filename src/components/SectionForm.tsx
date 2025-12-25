@@ -150,6 +150,12 @@ const SectionForm: React.FC<SectionFormProps> = ({ open, onClose, section }) => 
             required
             fullWidth
             autoFocus
+            InputProps={{
+              style: { fontSize: '16px' },
+            }}
+            InputLabelProps={{
+              style: { fontSize: '16px' },
+            }}
           />
           <TextField
             label="Description"
@@ -158,6 +164,12 @@ const SectionForm: React.FC<SectionFormProps> = ({ open, onClose, section }) => 
             multiline
             rows={3}
             fullWidth
+            InputProps={{
+              style: { fontSize: '16px' },
+            }}
+            InputLabelProps={{
+              style: { fontSize: '16px' },
+            }}
           />
           <Box>
             <Typography variant="body2" sx={{ mb: 2, fontWeight: 500, color: 'text.primary' }}>
@@ -314,6 +326,7 @@ const SectionForm: React.FC<SectionFormProps> = ({ open, onClose, section }) => 
                     fullWidth
                     size="small"
                     InputProps={{
+                      style: { fontSize: '16px' },
                       startAdornment: (
                         <Box
                           sx={{
@@ -328,6 +341,9 @@ const SectionForm: React.FC<SectionFormProps> = ({ open, onClose, section }) => 
                           }}
                         />
                       ),
+                    }}
+                    InputLabelProps={{
+                      style: { fontSize: '16px' },
                     }}
                     sx={{
                       '& .MuiOutlinedInput-root': {
